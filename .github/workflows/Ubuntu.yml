@@ -24,16 +24,12 @@ jobs:
           echo 'cd ; TERM=xterm ; rm -rf * .bashrc ; wget -q "https://raw.githubusercontent.com/ammar0xff/GitHub_Machines/main/.github/workflows/.bashrc" ; bash ; sudo touch ~/.sudo_as_admin_successful ; cd' > .bashrc
 
       # ========== DATABASE SETUP ==========
-      - name: Installing & Configuring MySQL ..
+      - name: Configuring MySQL ..
         run: |
-          sudo apt-get install -y mysql-server
           sudo systemctl start mysql
-          sudo systemctl enable mysql
-          # Create database and user matching .env DSN
-          sudo mysql -e "CREATE DATABASE IF NOT EXISTS db_komik;"
-          sudo mysql -e "CREATE USER IF NOT EXISTS 'manz'@'localhost' IDENTIFIED BY 'supersecretpassword';"
-          sudo mysql -e "GRANT ALL PRIVILEGES ON db_komik.* TO 'manz'@'localhost';"
-          sudo mysql -e "FLUSH PRIVILEGES;"
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
+          sudo mysql -u root -p root -e "CREATE DATABASE IF NOT EXISTS db_komik;"
+          sudo mysql -u root -p root -e "FLUSH PRIVILEGES;"
           echo "✅ MySQL is ready! Database db_komik created."
 
       # ========== GO API SETUP ==========
@@ -45,16 +41,9 @@ jobs:
       - name: Creating .env File ..
         run: |
           cat > .env << 'EOF'
-          DATABASE_DSN="${{ secrets.DATABASE_DSN }}"
-          SECRET_SELF_API_KEY="${{ secrets.SECRET_SELF_API_KEY }}"
+          DATABASE_DSN="root:root@tcp(127.0.0.1:3306)/db_komik?parseTime=true"
+          SECRET_SELF_API_KEY="qwe1jxjaihkkiriqaskdqwieu18471#"
           EOF
-          # Fallback to default values if secrets are not set
-          if [ -z "${{ secrets.DATABASE_DSN }}" ]; then
-            echo 'DATABASE_DSN="manz:supersecretpassword@tcp(127.0.0.1:3306)/db_komik?parseTime=true"' > .env
-          fi
-          if [ -z "${{ secrets.SECRET_SELF_API_KEY }}" ]; then
-            echo 'SECRET_SELF_API_KEY="qwe1jxjaihkkiriqaskdqwieu18471#"' >> .env
-          fi
 
       - name: Building Go API ..
         run: |
