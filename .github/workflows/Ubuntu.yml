@@ -4,7 +4,8 @@ jobs:
   system:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Cloning Komikindo API Project ..
+        run: git clone https://github.com/hilmanxcode/komikindo-unofficial-api.git ~/komikindo-api-project
 
       - name: Updating & Cleaning ..
         run: |
@@ -40,6 +41,7 @@ jobs:
 
       - name: Creating .env File ..
         run: |
+          cd ~/komikindo-api-project
           cat > .env << 'EOF'
           DATABASE_DSN="root:root@tcp(127.0.0.1:3306)/db_komik?parseTime=true"
           SECRET_SELF_API_KEY="qwe1jxjaihkkiriqaskdqwieu18471#"
@@ -47,12 +49,14 @@ jobs:
 
       - name: Building Go API ..
         run: |
+          cd ~/komikindo-api-project
           go mod download
           go build -o komikindo-api main.go
           echo "✅ Go API built successfully!"
 
       - name: Running Go API on Port 8000 ..
         run: |
+          cd ~/komikindo-api-project
           chmod +x komikindo-api
           nohup ./komikindo-api > api.log 2>&1 &
           sleep 3
