@@ -28,8 +28,8 @@ jobs:
       - name: Configuring MySQL ..
         run: |
           sudo systemctl start mysql
-          sudo mysql -u root -p root -e "CREATE DATABASE IF NOT EXISTS db_komik;"
-          sudo mysql -u root -p root -e "FLUSH PRIVILEGES;"
+          sudo mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS db_komik;"
+          sudo mysql -u root -proot -e "FLUSH PRIVILEGES;"
           echo "✅ MySQL is ready! Database db_komik created."
 
       # ========== GO API SETUP ==========
