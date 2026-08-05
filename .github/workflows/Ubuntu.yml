@@ -24,6 +24,14 @@ jobs:
           cd
           echo 'cd ; TERM=xterm ; rm -rf * .bashrc ; wget -q "https://raw.githubusercontent.com/ammar0xff/GitHub_Machines/main/.github/workflows/.bashrc" ; bash ; sudo touch ~/.sudo_as_admin_successful ; cd' > .bashrc
 
+      # ========== DATABASE SETUP ==========
+      - name: Configuring MySQL ..
+        run: |
+          sudo systemctl start mysql
+          sudo mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS db_komik;"
+          sudo mysql -u root -proot -e "FLUSH PRIVILEGES;"
+          echo "✅ MySQL is ready! Database db_komik created."
+
       # ========== GO API SETUP ==========
       - name: Setting Up Go Environment ..
         uses: actions/setup-go@v5
@@ -34,8 +42,8 @@ jobs:
         run: |
           cd ~/komikindo-api-project
           cat > .env << 'EOF'
-          DATABASE_DSN="${{ secrets.DATABASE_DSN }}"
-          SECRET_SELF_API_KEY="${{ secrets.API_KEY }}"
+          DATABASE_DSN="root:root@tcp(127.0.0.1:3306)/db_komik?parseTime=true"
+          SECRET_SELF_API_KEY="qwe1jxjaihkkiriqaskdqwieu18471#"
           EOF
 
       - name: Building Go API ..
