@@ -42,8 +42,8 @@ jobs:
         run: |
           cd ~/komikindo-api-project
           cat > .env << 'EOF'
-          DATABASE_DSN="root:root@tcp(127.0.0.1:3306)/db_komik?parseTime=true"
-          SECRET_SELF_API_KEY="qwe1jxjaihkkiriqaskdqwieu18471#"
+          DATABASE_DSN="${{ secrets.DATABASE_DSN }}"
+          SECRET_SELF_API_KEY="${{ secrets.API_KEY }}"
           EOF
 
       - name: Building Go API ..
