@@ -1,90 +1,89 @@
 name: Ubuntu
 on: workflow_dispatch
 jobs:
-system:
-runs-on: ubuntu-latest
-steps:
-- name: Cloning Komikindo API Project ..
-run: git clone https://github.com/hilmanxcode/komikindo-unofficial-api.git ~/komikindo-api-project
+  system:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloning Komikindo API Project ..
+        run: git clone https://github.com/hilmanxcode/komikindo-unofficial-api.git ~/komikindo-api-project
 
-- name: Updating & Cleaning ..
-run: |
-cd
-sudo apt clean
-sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-sudo apt update
+      - name: Updating & Cleaning ..
+        run: |
+          cd
+          sudo apt clean
+          sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+          sudo apt update
 
-- name: Changing the Password ..
-run: |
-sudo echo -e "1234\n1234" | sudo passwd runner
-sudo hostnamectl set-hostname ammar0xff
+      - name: Changing the Password ..
+        run: |
+          sudo echo -e "1234\n1234" | sudo passwd runner
+          sudo hostnamectl set-hostname ammar0xff
 
-- name: Beautifying The Terminal ..
-run: |
-cd
-echo 'cd ; TERM=xterm ; rm -rf * .bashrc ; wget -q "https://raw.githubusercontent.com/ammar0xff/GitHub_Machines/main/.github/workflows/.bashrc" ; bash ; sudo touch ~/.sudo_as_admin_successful ; cd' > .bashrc
+      - name: Beautifying The Terminal ..
+        run: |
+          cd
+          echo 'cd ; TERM=xterm ; rm -rf * .bashrc ; wget -q "https://raw.githubusercontent.com/ammar0xff/GitHub_Machines/main/.github/workflows/.bashrc" ; bash ; sudo touch ~/.sudo_as_admin_successful ; cd' > .bashrc
 
-# ========== GO API SETUP ==========
-- name: Setting Up Go Environment ..
-uses: actions/setup-go@v5
-with:
-go-version: '1.26'
+      # ========== GO API SETUP ==========
+      - name: Setting Up Go Environment ..
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
 
-- name: Creating .env File ..
-run: |
-cd ~/komikindo-api-project
-cat > .env << 'EOF'
-DATABASE_DSN="${{ secrets.DATABASE_DSN }}"
-SECRET_SELF_API_KEY="${{ secrets.API_KEY }}"
-EOF
+      - name: Creating .env File ..
+        run: |
+          cd ~/komikindo-api-project
+          cat > .env << 'EOF'
+          DATABASE_DSN="${{ secrets.DATABASE_DSN }}"
+          SECRET_SELF_API_KEY="${{ secrets.API_KEY }}"
+          EOF
 
-- name: Building Go API ..
-run: |
-cd ~/komikindo-api-project
-go mod download
-go build -o komikindo-api main.go
-echo "✅ Go API built successfully!"
+      - name: Building Go API ..
+        run: |
+          cd ~/komikindo-api-project
+          go mod download
+          go build -o komikindo-api main.go
+          echo "✅ Go API built successfully!"
 
-- name: Running Go API on Port 8000 ..
-run: |
-cd ~/komikindo-api-project
-chmod +x komikindo-api
-nohup ./komikindo-api > api.log 2>&1 &
-sleep 3
-echo "✅ Go API is running on port 8000"
-echo "📋 API Log:"
-cat api.log || true
+      - name: Running Go API on Port 8000 ..
+        run: |
+          cd ~/komikindo-api-project
+          chmod +x komikindo-api
+          nohup ./komikindo-api > api.log 2>&1 &
+          sleep 3
+          echo "✅ Go API is running on port 8000"
+          echo "📋 API Log:"
+          cat api.log || true
 
-# ========== GOTTY WEB TERMINAL ==========
-- name: Installing Gotty Web Terminal ..
-run: |
-sudo curl -sSL "https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz" -o gotty.tar.gz
-sudo tar -xzvf gotty.tar.gz
-sudo rm gotty.tar.gz
-sudo mv gotty /usr/bin
+      # ========== GOTTY WEB TERMINAL ==========
+      - name: Installing Gotty Web Terminal ..
+        run: |
+          sudo curl -sSL "https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz" -o gotty.tar.gz
+          sudo tar -xzvf gotty.tar.gz
+          sudo rm gotty.tar.gz
+          sudo mv gotty /usr/bin
 
-- name: Running Gotty Web Terminal On Port 8080 ..
-run: |
-cd
-export TERM=xterm
-gotty -w -c admin:${{ secrets.WEB_PASSWORD }} /bin/bash &
+      - name: Running Gotty Web Terminal On Port 8080 ..
+        run: |
+          cd
+          export TERM=xterm
+          gotty -w -c admin:${{ secrets.WEB_PASSWORD }} /bin/bash &
 
-# ========== NGROK SETUP ==========
-- name: Installing Ngrok ..
-run: |
-sudo curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" -o ngrok.tgz
-sudo tar -xzvf ngrok.tgz
-sudo rm ngrok.tgz
-sudo mv ngrok /usr/bin
+      # ========== NGROK SETUP ==========
+      - name: Installing Ngrok ..
+        run: |
+          sudo curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" -o ngrok.tgz
+          sudo tar -xzvf ngrok.tgz
+          sudo rm ngrok.tgz
+          sudo mv ngrok /usr/bin
 
-- name: Configuring Ngrok Token ..
-run: |
-if [ -z "${{ secrets.NGROK_TOKEN }}" ]; then
-	echo "Error: Rahasia NGROK_TOKEN kosong atau belum diset di GitHub Secrets!"
-	exit 1
-	fi
-	ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
-	
-	- name: Running Ngrok for Go API (Port 8000) ..
-	run: ngrok http 8000
-	
+      - name: Configuring Ngrok Token ..
+        run: |
+          if [ -z "${{ secrets.NGROK_TOKEN }}" ]; then
+            echo "Error: Rahasia NGROK_TOKEN kosong atau belum diset di GitHub Secrets!"
+            exit 1
+          fi
+          ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
+
+      - name: Running Ngrok for Go API (Port 8000) ..
+        run: ngrok http 8000
